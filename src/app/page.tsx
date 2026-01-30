@@ -125,7 +125,7 @@ const HomePage: React.FC = () => {
             About Fergusson College
           </h2>
           <p className="text-white/90 max-w-3xl mx-auto leading-relaxed">
-            Established in 1885, Fergusson College is one of India's premier educational institutions.
+            Established in 1885, Fergusson College is one of India&apos;s premier educational institutions.
             Our historic campus combines colonial architecture with modern facilities, providing
             an ideal environment for learning and growth. Join thousands of alumni who have
             walked these halls and made their mark on the world.

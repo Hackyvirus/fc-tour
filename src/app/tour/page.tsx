@@ -8,7 +8,7 @@ import SceneInfo from '@/app/componets/SceneInfo'
 import TourControls from '@/app/componets/TourControls'
 import SceneNavigation from '@/app/componets/SceneNavigation'
 import LoadingSpinner from '@/app/componets/LoadingSpinner'
-import { Scene, Hotspot } from '@/app/types/tour'
+import { Scene } from '@/app/types/tour'
 
 const TourPage: React.FC = () => {
   const [currentScene, setCurrentScene] = useState<Scene | null>(null)
@@ -123,6 +123,7 @@ const TourPage: React.FC = () => {
       } catch (err) {
         setError('Failed to load tour data. Please try again later.')
         setLoading(false)
+        console.log(err)
       }
     }
 
@@ -200,15 +201,17 @@ const TourPage: React.FC = () => {
     <>
       {!isFullscreen && <Header />}
       <div className={`${isFullscreen ? 'h-screen' : 'h-[calc(100vh-80px)]'} flex flex-col`}>
-        <TourControls
-          currentScene={currentScene}
-          showMap={showMap}
-          showInfo={showInfo}
-          isFullscreen={isFullscreen}
-          onToggleMap={() => setShowMap(!showMap)}
-          onToggleInfo={() => setShowInfo(!showInfo)}
-          onToggleFullscreen={toggleFullscreen}
-        />
+        {currentScene && (
+          <TourControls
+            currentScene={currentScene}
+            showMap={showMap}
+            showInfo={showInfo}
+            isFullscreen={isFullscreen}
+            onToggleMap={() => setShowMap(!showMap)}
+            onToggleInfo={() => setShowInfo(!showInfo)}
+            onToggleFullscreen={toggleFullscreen}
+          />
+        )}
 
         <div className="flex-1 relative overflow-hidden">
           <VirtualTourViewer

@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Scene, Hotspot } from '../types/tour'
 import { Info, ArrowRight, X } from 'lucide-react'
+import Image from 'next/image'
+
 
 interface VirtualTourViewerProps {
   scene: Scene | null
@@ -151,7 +153,7 @@ const VirtualTourViewer: React.FC<VirtualTourViewerProps> = ({
             </h3>
 
             {selectedHotspot.mediaUrl && (
-              <img
+              <Image
                 src={selectedHotspot.mediaUrl}
                 alt={selectedHotspot.label || 'Hotspot media'}
                 className="w-full h-40 object-cover rounded mb-3"

@@ -57,10 +57,10 @@ export interface ApiResponse<T> {
 }
 
 
-export interface SceneResponse extends ApiResponse<Scene> {}
-export interface ScenesResponse extends ApiResponse<Scene[]> {}
-export interface HotspotResponse extends ApiResponse<Hotspot> {}
-export interface MediaResponse extends ApiResponse<MediaAsset> {}
+// export interface SceneResponse extends ApiResponse<Scene> {}
+// export interface ScenesResponse extends ApiResponse<Scene[]> {}
+// export interface HotspotResponse extends ApiResponse<Hotspot> {}
+// export interface MediaResponse extends ApiResponse<MediaAsset> {}
 
 export interface SceneFormData {
   title: string

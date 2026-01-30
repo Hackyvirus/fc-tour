@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 import { Scene } from '../types/tour'
-import { MapPin, Navigation } from 'lucide-react'
+import { Navigation } from 'lucide-react'
 
 interface CampusMapProps {
   scenes: Scene[]

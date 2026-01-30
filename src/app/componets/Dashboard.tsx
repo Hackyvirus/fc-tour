@@ -37,24 +37,24 @@ const Dashboard = ({ children }: { children?: React.ReactNode }) => {
       icon: MapIcon,
       description: "Edit & organize scenes"
     },
-    {
-      label: "Analytics",
-      link: "/admin/analytics",
-      icon: ChartBarIcon,
-      description: "Tour performance metrics"
-    },
-    {
-      label: "Settings",
-      link: "/admin/settings",
-      icon: CogIcon,
-      description: "Configure tour settings"
-    },
-    {
-      label: "Profile",
-      link: "/admin/profile",
-      icon: UserIcon,
-      description: "Manage your account"
-    }
+    // {
+    //   label: "Analytics",
+    //   link: "/admin/analytics",
+    //   icon: ChartBarIcon,
+    //   description: "Tour performance metrics"
+    // },
+    // {
+    //   label: "Settings",
+    //   link: "/admin/settings",
+    //   icon: CogIcon,
+    //   description: "Configure tour settings"
+    // },
+    // {
+    //   label: "Profile",
+    //   link: "/admin/profile",
+    //   icon: UserIcon,
+    //   description: "Manage your account"
+    // }
   ]
 
   const isActive = (link: string) => {
@@ -154,9 +154,9 @@ const Dashboard = ({ children }: { children?: React.ReactNode }) => {
                 </div>
               </div>
             </div>
-            <button className="w-full text-xs text-white/60 hover:text-white transition-colors">
+            {/* <button className="w-full text-xs text-white/60 hover:text-white transition-colors">
               Sign Out
-            </button>
+            </button> */}
           </div>
         </div>
       </aside>
@@ -244,7 +244,7 @@ const DefaultDashboardContent = () => {
           Welcome back, Admin!
         </h2>
         <p className="text-white/70">
-          Here's what's happening with your virtual tour today
+          Here&apos;s what&apos;s happening with your virtual tour today
         </p>
       </div>
 
@@ -273,7 +273,7 @@ const DefaultDashboardContent = () => {
           )
         })}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="glass rounded-xl p-6 border border-white/10">
           <h3 className="text-xl font-semibold text-white mb-4">
             Recent Activity
@@ -351,9 +351,9 @@ const DefaultDashboardContent = () => {
             </Link>
           </div>
         </div>
-      </div>
+      </div> */}
 
-      <div className="glass rounded-xl p-6 border border-white/10">
+      {/* <div className="glass rounded-xl p-6 border border-white/10">
         <h3 className="text-xl font-semibold text-white mb-4">
           Tour Health Status
         </h3>
@@ -392,7 +392,7 @@ const DefaultDashboardContent = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

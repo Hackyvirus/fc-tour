@@ -4,7 +4,7 @@ import React from 'react'
 import { Maximize2, Map, Info } from 'lucide-react'
 
 interface Props {
-  currentScene: any
+  currentScene: { title: string } | string
   showMap: boolean
   showInfo: boolean
   isFullscreen: boolean
@@ -24,10 +24,8 @@ const TourControls: React.FC<Props> = ({
 }) => {
   return (
     <div className="flex items-center justify-center bg-gray-900/80 text-white py-2 px-4 gap-4">
-      <span className="font-semibold">{currentScene?.title || 'Tour'}</span>
+      <span className="font-semibold">{typeof currentScene === 'object' ? currentScene?.title : currentScene || 'Tour'}</span>
       <button 
-        onClick={onToggleMap} 
-        className={`px-3 py-1 rounded-lg text-sm ${showMap ? 'bg-yellow-400 text-black' : 'bg-white/20 hover:bg-white/30'}`}
       >
         <Map className="inline-block w-4 h-4 mr-1" /> Map
       </button>
