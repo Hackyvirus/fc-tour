@@ -1,9 +1,8 @@
 import { Pool } from "pg";
 
 export const pool = new Pool({
-  user: "postgres",
-  password: "591081",
-  host: "localhost",
-  port: 5432,
-  database: "evertour"
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // important for Neon on Vercel
+  },
 });
