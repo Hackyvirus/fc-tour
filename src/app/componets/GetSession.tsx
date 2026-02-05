@@ -5,9 +5,20 @@ import TourControls from "./TourControls";
 
 
 
-export default async function GetSession.tsx() {
+export default async function GetSession() {
   const session = await getSession();
 
-  return <TourControls session={session} />;
+  return (
+    <TourControls
+      session={session}
+      currentScene='scene'
+      showMap={false}
+      showInfo={false}
+      isFullscreen={false}
+      onToggleMap={() => {}}
+      onToggleInfo={() => {}}
+      onToggleFullscreen={() => {}}
+    />
+  );
 }
 
