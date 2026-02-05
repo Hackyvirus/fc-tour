@@ -44,7 +44,7 @@ const ManageScenes = () => {
     try {
       const response = await fetch('/api/scenes')
       const data = await response.json()
-      
+
       // Ensure data is an array
       const scenesArray = Array.isArray(data) ? data : []
       setScenes(scenesArray)
@@ -104,8 +104,8 @@ const ManageScenes = () => {
         setScenes(prev =>
           Array.isArray(prev)
             ? prev.map(s =>
-                s._id === sceneId ? { ...s, published: !s.published } : s
-              )
+              s._id === sceneId ? { ...s, published: !s.published } : s
+            )
             : []
         )
       }
@@ -132,8 +132,8 @@ const ManageScenes = () => {
         setScenes(prev =>
           Array.isArray(prev)
             ? prev.map(s =>
-                s._id === sceneId ? { ...s, nextSceneId: nextSceneId || undefined } : s
-              )
+              s._id === sceneId ? { ...s, nextSceneId: nextSceneId || undefined } : s
+            )
             : []
         )
       }
@@ -266,6 +266,8 @@ const ManageScenes = () => {
               {/* Scene Image */}
               <div className="relative h-48 bg-white/5">
                 <Image
+                  width={200}
+                  height={100}
                   src={scene.mediaUrl}
                   alt={scene.title}
                   className="w-full h-full object-cover"
