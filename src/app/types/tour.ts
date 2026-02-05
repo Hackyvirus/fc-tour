@@ -7,32 +7,49 @@ export interface User {
   createdAt: Date
 }
 
+
 export interface Scene {
   _id: string
   title: string
   slug: string
   description: string
   mediaUrl: string
-  mediaPublicId?: string
-  coords?: { lat: number; lng: number }
-  yawPitchFov?: { yaw: number; pitch: number; fov: number }
+  coords: {
+    lat: number
+    lng: number
+  }
+  yawPitchFov: {
+    yaw: number
+    pitch: number
+    fov: number
+  }
   published: boolean
-  createdBy?: string
-  createdAt?: Date
-  hotspots: Hotspot[]
+  nextSceneId?: string  // Optional: ID of the next scene in the tour chain
+  hotspots?: Hotspot[]  // Optional: array of hotspots for this scene
 }
 
 export interface Hotspot {
   _id: string
   sceneId: string
-  type: 'link' | 'info'
-  targetSceneId?: string
-  label?: string
-  mediaUrl?: string
-  yawPitch: { yaw: number; pitch: number }
-  order?: number
-  createdAt?: Date
+  type: 'link' | 'info' | 'media'
+  targetSceneId?: string  
+  label: string
+  description : string
+  mediaUrl?: string  
+  yawPitch: {
+    yaw: number
+    pitch: number
+  }
+  order: number
 }
+
+export interface TourSettings {
+  autoRotate: boolean
+  autoRotateSpeed: number
+  showHotspotLabels: boolean
+  enableSound: boolean
+}
+
 
 export interface MediaAsset {
   _id: string

@@ -8,7 +8,7 @@ import { Menu, X, Home, Play, Settings } from 'lucide-react'
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
-
+  
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/tour', label: 'Virtual Tour', icon: Play },

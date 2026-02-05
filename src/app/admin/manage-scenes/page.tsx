@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 
+import {
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
@@ -11,6 +11,7 @@ import {
   PlusIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Scene {
   _id: string
@@ -23,6 +24,7 @@ interface Scene {
   hotspots: number
   views: number
   createdAt: string
+  nextSceneId?: string
 }
 
 const ManageScenes = () => {
@@ -32,89 +34,42 @@ const ManageScenes = () => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all')
   const [loading, setLoading] = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [updating, setUpdating] = useState<string | null>(null)
 
   useEffect(() => {
-    // Simulate fetching scenes
-    const fetchScenes = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const mockScenes: Scene[] = [
-        {
-          _id: '1',
-          title: 'Main Gate',
-          slug: 'main-gate',
-          description: 'Historic entrance to Fergusson College established in 1885.',
-          mediaUrl: '/images/gate.jpg',
-          published: true,
-          coords: { lat: 18.5204, lng: 73.8567 },
-          hotspots: 2,
-          views: 1245,
-          createdAt: '2024-01-15'
-        },
-        {
-          _id: '2',
-          title: 'Central Quadrangle',
-          slug: 'central-quad',
-          description: 'The heart of campus with beautiful colonial architecture.',
-          mediaUrl: '/images/quad.jpg',
-          published: true,
-          coords: { lat: 18.5206, lng: 73.8570 },
-          hotspots: 4,
-          views: 892,
-          createdAt: '2024-01-16'
-        },
-        {
-          _id: '3',
-          title: 'Main Library',
-          slug: 'library',
-          description: 'Modern library with extensive digital resources.',
-          mediaUrl: '/images/library.jpg',
-          published: true,
-          coords: { lat: 18.5208, lng: 73.8572 },
-          hotspots: 3,
-          views: 710,
-          createdAt: '2024-01-17'
-        },
-        {
-          _id: '4',
-          title: 'Science Block',
-          slug: 'science-block',
-          description: 'State-of-the-art laboratories and research facilities.',
-          mediaUrl: '/images/science.jpg',
-          published: false,
-          coords: { lat: 18.5210, lng: 73.8574 },
-          hotspots: 1,
-          views: 0,
-          createdAt: '2024-01-18'
-        },
-        {
-          _id: '5',
-          title: 'Sports Complex',
-          slug: 'sports-complex',
-          description: 'Indoor and outdoor sports facilities.',
-          mediaUrl: '/images/sports.jpg',
-          published: false,
-          coords: { lat: 18.5212, lng: 73.8576 },
-          hotspots: 0,
-          views: 0,
-          createdAt: '2024-01-19'
-        }
-      ]
-
-      setScenes(mockScenes)
-      setFilteredScenes(mockScenes)
-      setLoading(false)
-    }
-
     fetchScenes()
   }, [])
 
+  const fetchScenes = async () => {
+    try {
+      const response = await fetch('/api/scenes')
+      const data = await response.json()
+      
+      // Ensure data is an array
+      const scenesArray = Array.isArray(data) ? data : []
+      setScenes(scenesArray)
+      setFilteredScenes(scenesArray)
+    } catch (error) {
+      console.error('Error fetching scenes:', error)
+      setScenes([])
+      setFilteredScenes([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
+    // Ensure scenes is an array before filtering
+    if (!Array.isArray(scenes)) {
+      setFilteredScenes([])
+      return
+    }
+
     let result = scenes
 
     // Filter by status
     if (filterStatus !== 'all') {
-      result = result.filter(scene => 
+      result = result.filter(scene =>
         filterStatus === 'published' ? scene.published : !scene.published
       )
     }
@@ -130,17 +85,78 @@ const ManageScenes = () => {
     setFilteredScenes(result)
   }, [searchQuery, filterStatus, scenes])
 
-  const togglePublishStatus = (sceneId: string) => {
-    setScenes(prev =>
-      prev.map(scene =>
-        scene._id === sceneId ? { ...scene, published: !scene.published } : scene
-      )
-    )
+  const togglePublishStatus = async (sceneId: string) => {
+    setUpdating(sceneId)
+    try {
+      const scene = Array.isArray(scenes) ? scenes.find(s => s._id === sceneId) : null
+      if (!scene) return
+
+      const response = await fetch('/api/scenes/update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sceneId,
+          published: !scene.published
+        })
+      })
+
+      if (response.ok) {
+        setScenes(prev =>
+          Array.isArray(prev)
+            ? prev.map(s =>
+                s._id === sceneId ? { ...s, published: !s.published } : s
+              )
+            : []
+        )
+      }
+    } catch (error) {
+      console.error('Error toggling publish status:', error)
+    } finally {
+      setUpdating(null)
+    }
   }
 
-  const handleDelete = (sceneId: string) => {
-    setScenes(prev => prev.filter(scene => scene._id !== sceneId))
-    setDeleteConfirm(null)
+  const updateNextScene = async (sceneId: string, nextSceneId: string) => {
+    setUpdating(sceneId)
+    try {
+      const response = await fetch('/api/scenes/update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sceneId,
+          nextSceneId: nextSceneId || null
+        })
+      })
+
+      if (response.ok) {
+        setScenes(prev =>
+          Array.isArray(prev)
+            ? prev.map(s =>
+                s._id === sceneId ? { ...s, nextSceneId: nextSceneId || undefined } : s
+              )
+            : []
+        )
+      }
+    } catch (error) {
+      console.error('Error updating next scene:', error)
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const handleDelete = async (sceneId: string) => {
+    try {
+      const response = await fetch(`/api/scenes/${sceneId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setScenes(prev => Array.isArray(prev) ? prev.filter(scene => scene._id !== sceneId) : [])
+        setDeleteConfirm(null)
+      }
+    } catch (error) {
+      console.error('Error deleting scene:', error)
+    }
   }
 
   if (loading) {
@@ -189,33 +205,30 @@ const ManageScenes = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setFilterStatus('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterStatus === 'all'
-                  ? 'bg-yellow-400 text-gray-900'
-                  : 'bg-white/5 text-white hover:bg-white/10'
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === 'all'
+                ? 'bg-yellow-400 text-gray-900'
+                : 'bg-white/5 text-white hover:bg-white/10'
+                }`}
             >
-              All ({scenes.length})
+              All ({Array.isArray(scenes) ? scenes.length : 0})
             </button>
             <button
               onClick={() => setFilterStatus('published')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterStatus === 'published'
-                  ? 'bg-yellow-400 text-gray-900'
-                  : 'bg-white/5 text-white hover:bg-white/10'
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === 'published'
+                ? 'bg-yellow-400 text-gray-900'
+                : 'bg-white/5 text-white hover:bg-white/10'
+                }`}
             >
-              Published ({scenes.filter(s => s.published).length})
+              Published ({Array.isArray(scenes) ? scenes.filter(s => s.published).length : 0})
             </button>
             <button
               onClick={() => setFilterStatus('draft')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterStatus === 'draft'
-                  ? 'bg-yellow-400 text-gray-900'
-                  : 'bg-white/5 text-white hover:bg-white/10'
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === 'draft'
+                ? 'bg-yellow-400 text-gray-900'
+                : 'bg-white/5 text-white hover:bg-white/10'
+                }`}
             >
-              Drafts ({scenes.filter(s => !s.published).length})
+              Drafts ({Array.isArray(scenes) ? scenes.filter(s => !s.published).length : 0})
             </button>
           </div>
         </div>
@@ -248,88 +261,107 @@ const ManageScenes = () => {
           {filteredScenes.map((scene) => (
             <div
               key={scene._id}
-              className="glass rounded-xl border border-white/10 overflow-hidden hover:border-yellow-400/30 transition-colors"
+              className="glass rounded-xl border border-white/10 overflow-hidden"
             >
               {/* Scene Image */}
-              <div className="relative h-48 bg-gradient-to-br from-blue-500/20 to-purple-500/20">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <MapIcon className="w-16 h-16 text-white/20" />
-                </div>
-                {!scene.published && (
-                  <div className="absolute top-3 left-3 px-3 py-1 bg-orange-500 rounded-full text-xs font-semibold text-white">
-                    Draft
-                  </div>
-                )}
-                <div className="absolute top-3 right-3 flex gap-2">
-                  <div className="px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-xs font-semibold text-white">
-                    {scene.hotspots} hotspots
-                  </div>
-                  <div className="px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-xs font-semibold text-white">
-                    {scene.views} views
-                  </div>
+              <div className="relative h-48 bg-white/5">
+                <Image
+                  src={scene.mediaUrl}
+                  alt={scene.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 right-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${scene.published
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                      }`}
+                  >
+                    {scene.published ? 'Published' : 'Draft'}
+                  </span>
                 </div>
               </div>
 
               {/* Scene Info */}
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-bold text-white mb-2">
                   {scene.title}
                 </h3>
-                <p className="text-sm text-white/60 mb-4 line-clamp-2">
+                <p className="text-white/60 text-sm mb-4 line-clamp-2">
                   {scene.description}
                 </p>
 
-                <div className="flex items-center gap-2 text-xs text-white/40 mb-4">
-                  <MapIcon className="w-4 h-4" />
-                  <span>
-                    {scene.coords.lat.toFixed(4)}, {scene.coords.lng.toFixed(4)}
-                  </span>
-                  <span className="mx-2">•</span>
-                  <span>Added {new Date(scene.createdAt).toLocaleDateString()}</span>
+                {/* Stats */}
+                <div className="flex items-center gap-4 mb-4 text-sm text-white/50">
+                  <span>{scene.hotspots} hotspots</span>
+                  <span>•</span>
+                  <span>{scene.views} views</span>
+                  <span>•</span>
+                  <span>/{scene.slug}</span>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Next Scene Connection */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Connect to Next Scene
+                  </label>
+                  <select
+                    value={scene.nextSceneId || ''}
+                    onChange={(e) => updateNextScene(scene._id, e.target.value)}
+                    disabled={updating === scene._id}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-yellow-400 disabled:opacity-50"
+                  >
+                    <option value="">-- No Connection --</option>
+                    {Array.isArray(scenes) && scenes
+                      .filter(s => s._id !== scene._id)
+                      .map(s => (
+                        <option key={s._id} value={s._id}>
+                          {s.title}
+                        </option>
+                      ))}
+                  </select>
+                  {scene.nextSceneId && Array.isArray(scenes) && (
+                    <p className="text-xs text-white/50 mt-1">
+                      → {scenes.find(s => s._id === scene.nextSceneId)?.title}
+                    </p>
+                  )}
+                </div>
+
+                {/* Actions */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => togglePublishStatus(scene._id)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                      scene.published
-                        ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                        : 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
-                    }`}
+                    disabled={updating === scene._id}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors disabled:opacity-50"
+                    title={scene.published ? 'Unpublish' : 'Publish'}
                   >
                     {scene.published ? (
-                      <>
-                        <EyeIcon className="w-4 h-4" />
-                        Published
-                      </>
+                      <EyeSlashIcon className="w-4 h-4" />
                     ) : (
-                      <>
-                        <EyeSlashIcon className="w-4 h-4" />
-                        Publish
-                      </>
+                      <EyeIcon className="w-4 h-4" />
                     )}
+                    {scene.published ? 'Unpublish' : 'Publish'}
                   </button>
 
-                  <button
-                    onClick={() => alert(`Edit scene: ${scene.title}`)}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg font-medium hover:bg-blue-500/30 transition-colors"
+                  <Link
+                    href={`/admin/edit-scene/${scene._id}`}
+                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-lg transition-colors"
+                    title="Edit"
                   >
                     <PencilIcon className="w-4 h-4" />
-                    Edit
-                  </button>
+                  </Link>
 
                   {deleteConfirm === scene._id ? (
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleDelete(scene._id)}
-                        className="px-3 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600"
+                        className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition-colors"
                       >
                         Confirm
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(null)}
-                        className="px-3 py-2 bg-white/10 text-white rounded-lg text-sm font-medium hover:bg-white/20"
+                        className="px-3 py-2 bg-white/5 hover:bg-white/10 text-white text-sm rounded-lg transition-colors"
                       >
                         Cancel
                       </button>
@@ -337,7 +369,8 @@ const ManageScenes = () => {
                   ) : (
                     <button
                       onClick={() => setDeleteConfirm(scene._id)}
-                      className="flex items-center justify-center p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                      className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                      title="Delete"
                     >
                       <TrashIcon className="w-4 h-4" />
                     </button>
@@ -354,25 +387,25 @@ const ManageScenes = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div>
             <div className="text-2xl font-bold text-white mb-1">
-              {scenes.length}
+              {Array.isArray(scenes) ? scenes.length : 0}
             </div>
             <div className="text-sm text-white/60">Total Scenes</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-green-400 mb-1">
-              {scenes.filter(s => s.published).length}
+              {Array.isArray(scenes) ? scenes.filter(s => s.published).length : 0}
             </div>
             <div className="text-sm text-white/60">Published</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-orange-400 mb-1">
-              {scenes.filter(s => !s.published).length}
+              {Array.isArray(scenes) ? scenes.filter(s => !s.published).length : 0}
             </div>
             <div className="text-sm text-white/60">Drafts</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-yellow-400 mb-1">
-              {scenes.reduce((acc, scene) => acc + scene.views, 0)}
+              {Array.isArray(scenes) ? scenes.reduce((acc, scene) => acc + scene.views, 0) : 0}
             </div>
             <div className="text-sm text-white/60">Total Views</div>
           </div>
